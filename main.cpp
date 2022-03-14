@@ -17,7 +17,7 @@ using namespace std;
 class Assign{
 private:
     vector<vector<bool>> filled; // stores offset
-    uint32_t capacity = 200;
+    int capacity = 200;
     uint32_t numRows = 10;
     uint32_t numCols = 20;
     vector<bool> rows_visited;
@@ -31,16 +31,16 @@ private:
     
 public:
     void init_map(){
-        filled.resize(10, vector<bool>(20,false)); // 10 x 20 memo vector, all initially false
+        filled.resize(numRows, vector<bool>(numCols,false)); // 10 x 20 memo vector, all initially false
       // TODO: handle reservations with more than 10 customers
-        rows_visited.resize(10,false); // initially nothing has been filled
-        for(uint32_t i = 0; i < 20; i++){
-            seats_left[i] = 20;
+        rows_visited.resize(numRows,false); // initially nothing has been filled
+        for(uint32_t i = 0; i < numCols; i++){
+            seats_left[i] = numCols;
         }
     }
     
     void fill_map(uint32_t seats){
-        capacity -= seats;
+        capacity -= (int)seats;
         if(capacity < 0){ // Error checking if more than 200 seats in total requested
             exit(1);
         }
@@ -62,6 +62,9 @@ public:
                             }
                         }
                         seats_left[row] = seats_left[row] - seats - 3;
+                        if(seats_left[row] > numCols){ // overflow error helper
+                            seats_left[row] = 0;
+                        }
                         cout << "\n";
                         flag = false;
                         break;
@@ -79,6 +82,9 @@ public:
                             }
                             //std::cout << std::setfill('0') << std::setw(5) << 25;
                             seats_left[row] = seats_left[row] - seats - 3;
+                            if(seats_left[row] > numCols){ // overflow error helper
+                                seats_left[row] = 0;
+                            }
                             cout << "\n";
                             flag = false;
                             break;
@@ -107,7 +113,7 @@ public:
                                 }
                                 //std::cout << std::setfill('0') << std::setw(5) << 25;
                                 seats_left[row] = seats_left[row] - seats - 3;
-                                if(seats_left[row] > 20){
+                                if(seats_left[row] > numCols){ // overflow error helper
                                     seats_left[row] = 0;
                                 }
                                 cout << "\n";
