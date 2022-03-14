@@ -49,7 +49,7 @@ Use the makefile given to help build the solution. <br />
 ```bash
 make
 ```
-``bash
+```bash
 ./main < [path to input file] > [path to output file]
 ```
 
