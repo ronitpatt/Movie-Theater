@@ -22,17 +22,21 @@ private:
     uint32_t numCols = 20;
     vector<bool> rows_visited;
     vector<uint32_t> fill_order = {5,7,3,1,9,6,4,8,2,0}; // Prioritize one row difference as much as possible
-    
+    vector<uint32_t> fill_order_large = {5,4,6,3,7,2,8,1,9,0};
    /* map<int,bool> row_filled = { {5,false}, {7,false}, {3,false}, {1,false}, {9,false}, {6,false}, {4,false}, {8,false} , {2,false}, {0,false}};*/
     map<uint32_t,char> row_map = {{0,'A'},{1,'B'}, {2,'C'}, {3,'D'}, {4,'E'}, {5,'F'}, {6,'G'}, {7,'H'}, {8,'I'}, {9,'J'} };
     
-  //  map<int, int> visited; // key is row, and value is offset from
+  //TODO: Add helper seats left map
+    map<uint32_t, uint32_t> seats_left; // key is row, value is seats remaining in the given row
     
 public:
     void init_map(){
         filled.resize(10, vector<bool>(20,false)); // 10 x 20 memo vector, all initially false
       // TODO: handle reservations with more than 10 customers
         rows_visited.resize(10,false); // initially nothing has been filled
+        for(uint32_t i = 0; i < 20; i++){
+            seats_left[i] = 20;
+        }
     }
     
     void fill_map(uint32_t seats){
@@ -40,6 +44,7 @@ public:
         if(capacity < 0){ // Error checking if more than 200 seats in total requested
             exit(1);
         }
+        bool flag = true;
         for(uint32_t i = 0; i < numRows; i++){
             if(!rows_visited[fill_order[i]]){
                 uint32_t row = fill_order[i];
@@ -56,7 +61,9 @@ public:
                                 start_idx++;
                             }
                         }
+                        seats_left[row] = seats_left[row] - seats - 3;
                         cout << "\n";
+                        flag = false;
                         break;
                     }
                 }
@@ -71,7 +78,9 @@ public:
                                 }
                             }
                             //std::cout << std::setfill('0') << std::setw(5) << 25;
+                            seats_left[row] = seats_left[row] - seats - 3;
                             cout << "\n";
+                            flag = false;
                             break;
                         }
                     }
@@ -80,13 +89,40 @@ public:
             }
         }
         
-        // Code only reaches here when all rows filled :
+        // Code only reaches here when all rows have at least one entry :
         // ------- Larger Test Cases Logic ------- //
-        
+        if(flag){
+            for(uint32_t i = 0; i < numRows; i++){
+                uint32_t row = fill_order_large[i];
+                if(seats_left[row] > seats){
+                    for(uint32_t j = 0; j < numCols; j++){
+                        if(!filled[row][j]){
+                            if(j <= numCols - seats){ // can fit in column
+                                uint32_t bound = min(numCols, j + seats + 3); // + 3 accounts for buffer
+                                for(uint32_t k = j; k < bound; k++){
+                                    filled[row][k] = true;
+                                    if(k < j + seats){
+                                        cout << row_map[row] << k + 1 << ",";
+                                    }
+                                }
+                                //std::cout << std::setfill('0') << std::setw(5) << 25;
+                                seats_left[row] = seats_left[row] - seats - 3;
+                                if(seats_left[row] > 20){
+                                    seats_left[row] = 0;
+                                }
+                                cout << "\n";
+                                break;
+                            }
+                        }
+                    }
+                    break;
+                }
+            }
+        }
         
     }
-    void output(){
-        
+    void valid_output(){ //TODO: tester for output
+        // idea save output in string : delete comma from end
     }
 };
 
@@ -104,6 +140,5 @@ int main() {
         uint32_t param = (uint32_t) num_seats;
         a.fill_map(param);
     }
-    a.output();
     return 0;
 }
